@@ -34,13 +34,13 @@ async def cmd_info(message: types.Message, started_at: str):
 async def message_handler(msg: types.Message):
     yt_link_pattern = r"^(https?://)?(www\.)?(youtube\.com/watch\?v=|youtu\.be/)([a-zA-Z0-9_-]{11})"
     match = re.search(yt_link_pattern, msg.text)
-    video_link = match.group(0)
-    video_id = match.group(4)
 
     if not match:
         print(f"Some error with matching Youtube video link.")
         return
     try:
+        video_link = match.group(0)
+        video_id = match.group(4)
         if os.path.exists(f"{video_id}.mp3"):
             video = YouTube(f"https://www.youtube.com/watch?v={video_id}")
             print(f"[User {msg.chat.id}] We have video '{video_id}' in cache, sending...")
@@ -59,6 +59,7 @@ async def message_handler(msg: types.Message):
         await msg.answer(f"Error: {e}")
         return
     
+
     await msg.answer_audio(audio=types.FSInputFile(f"{video_id}.mp3"), caption="caption", title=video.title)
 
 async def main():
