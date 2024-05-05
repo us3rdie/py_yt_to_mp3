@@ -40,25 +40,25 @@ async def message_handler(msg: types.Message):
     match = re.search(yt_link_pattern, msg.text)
 
     if not match:
-        print(f"Some error with matching Youtube video link.")
+        logging.info(f"Some error with matching Youtube video link.")
         return
     try:
         video_link = match.group(0)
         video_id = match.group(4)
         if os.path.exists(f"{video_id}.mp3"):
             video = YouTube(f"https://www.youtube.com/watch?v={video_id}")
-            print(f"[User {msg.chat.id}] We have video '{video_id}' in cache, sending...")
+            logging.info(f"[User {msg.chat.id}] We have video '{video_id}' in cache, sending...")
             await msg.answer_audio(audio=types.FSInputFile(f"cache/{video_id}.mp3"), caption="from cache", title=video.title)
             return
-        print(f"[User {msg.chat.id}] Downloading video...")
+        logging.info(f"[User {msg.chat.id}] Downloading video...")
         video = YouTube(video_link)
         if video.length > 10800:
-            print(f"Video too long (>3h). We will not download it.")
+            logging.info(f"Video too long (>3h). We will not download it.")
             return
         stream = video.streams.filter(only_audio=True).first()
         audio = AudioFileClip(stream.url)
         audio.write_audiofile(f"cache/{video_id}.mp3")
-        print(f"[User {msg.chat.id}] '{video.title}' downloaded successfully!")
+        logging.info(f"[User {msg.chat.id}] '{video.title}' downloaded successfully!")
     except (VideoUnavailable, PytubeError) as e:
         await msg.answer(f"Error: {e}")
         return
@@ -72,7 +72,7 @@ def delete_old_files(directory_path):
         file_mod_time = datetime.fromtimestamp(os.path.getmtime(file_path))
         if (current_time - file_mod_time).days > 7:
             os.remove(file_path)
-            print(f"File {filename} was deleted because it was created more than 7 days ago.")
+            logging.info(f"File {filename} was deleted because it was created more than 7 days ago.")
 
 async def schedule_deletion(directory_path, interval=604800):  # interval в секундах (7 дней)
     """Запускает функцию удаления каждые 7 дней."""
