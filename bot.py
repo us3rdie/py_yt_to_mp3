@@ -58,8 +58,6 @@ async def message_handler(msg: types.Message):
     except (VideoUnavailable, PytubeError) as e:
         await msg.answer(f"Error: {e}")
         return
-    
-
     await msg.answer_audio(audio=types.FSInputFile(f"{video_id}.mp3"), caption="caption", title=video.title)
 
 async def main():
